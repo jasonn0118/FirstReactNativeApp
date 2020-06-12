@@ -1,29 +1,50 @@
 import React, { useState } from "react";
-import { StyleSheet, Text, View, Button, TextInput } from "react-native";
+import {
+  StyleSheet,
+  View,
+  Button,
+  FlatList,
+} from "react-native";
+import GoalItem from "./components/GoalItem";
+import GoalInput from "./components/GoalInput";
 
 export default function App() {
-  const [enteredGoal, setEnteredGoal] = useState("");
+  const [courseGoals, setCourseGoals] = useState([]);
+  const [isAddMode, setIsAddMode] = useState(false);
 
-  const goalInputHandler = (enteredText) => {
-    setEnteredGoal(enteredText);
+  const addGoalHandler = (goalTitle) => {
+    setCourseGoals((currentGoal) => [
+      ...currentGoal,
+      { id: Math.random().toString(), value: goalTitle },
+    ]);
+    setIsAddMode(false);
   };
 
-  const addGoalHandler = () => {
-    console.log(enteredGoal, '>>>> this is entered input');
+  const removeGoalHandler = (goalId) => {
+    setCourseGoals((currentGoal) => {
+      return currentGoal.filter((goal) => goal.id !== goalId);
+    });
   };
+
+  const cancelGoalOnHandler = () => {
+    setIsAddMode(false);
+  }
 
   return (
     <View style={styles.root}>
-      <View style={styles.inputContainer}>
-        <TextInput
-          placeholder="Course Goal"
-          style={styles.input}
-          onChangeText={goalInputHandler}
-          value={enteredGoal}
-        />
-        <Button title="ADD" onPress={addGoalHandler}/>
-      </View>
-      <View></View>
+      <Button title="Add New Goal" onPress={() => setIsAddMode(true)}/>
+      <GoalInput visible={isAddMode} addGoalHandler={addGoalHandler} onCancel={cancelGoalOnHandler}/>
+      <FlatList
+        keyExtractor={(item, index) => item.id}
+        data={courseGoals}
+        renderItem={(itemData) => (
+          <GoalItem
+            id={itemData.item.id}
+            onDelete={removeGoalHandler}
+            title={itemData.item.value}
+          />
+        )}
+      />
     </View>
   );
 }
@@ -31,16 +52,5 @@ export default function App() {
 const styles = StyleSheet.create({
   root: {
     padding: 60,
-  },
-  inputContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  input: {
-    width: "80%",
-    padding: 10,
-    borderBottomColor: "black",
-    borderBottomWidth: 1,
   },
 });
